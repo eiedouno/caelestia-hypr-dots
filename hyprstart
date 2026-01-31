@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+sleep 4
+
+dr
+sleep 3
+hyprctl dispatch submap global
