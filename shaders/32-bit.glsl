@@ -8,7 +8,7 @@ uniform sampler2D tex;
 uniform vec2 screenSize;
 
 void main() {
-    float pixelSize = 1.0; // Increase for chunkier pixels
+    float pixelSize = 0.1; // Increase for chunkier pixels
 
     // Compute pixelated UV
     vec2 pos = floor(v_texcoord * screenSize / pixelSize) * pixelSize / screenSize;
