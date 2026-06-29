@@ -21,7 +21,7 @@ hl.bind(vars.kbLock, hl.dsp.global("caelestia:lock"))
 hl.bind(vars.kbRestoreLock, function()
 	hl.dispatch(hl.dsp.exec_cmd("caelestia shell -d"))
 	hl.dispatch(hl.dsp.global("caelestia:lock"))
-end)
+end, { locked = true })
 
 -- Brightness
 hl.bind("XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), { locked = true })
@@ -94,7 +94,7 @@ hl.bind("CTRL + SUPER + SHIFT + M", hl.dsp.window.move({ workspace = "special:mu
 
 -- Window groups
 hl.bind(vars.kbWindowGroupCycleNext, hl.dsp.window.cycle_next(), { repeating = true })
-hl.bind(vars.kbWindowGroupCyclePrev, hl.dsp.window.cycle_next(), { repeating = true })
+hl.bind(vars.kbWindowGroupCyclePrev, hl.dsp.window.cycle_next({ next = false }), { repeating = true })
 hl.bind("CTRL + ALT + Tab", hl.dsp.group.next(), { repeating = true })
 hl.bind("CTRL + SHIFT + ALT + Tab", hl.dsp.group.prev(), { repeating = true })
 hl.bind(vars.kbToggleGroup, hl.dsp.group.toggle())
@@ -130,8 +130,10 @@ hl.bind(vars.kbWindowPip, function()
 	local a = hl.get_active_window()
 	if a then
 		local pip = fn.move_actions(a) or {}
-		table.insert(pip, 1, hl.dsp.window.float())
-		table.insert(pip, hl.dsp.window.pin({ window = "address:" .. a.address }))
+		if not a.floating then
+			table.insert(pip, 1, hl.dsp.window.float())
+		end
+		table.insert(pip, hl.dsp.window.pin({ action = "on", window = "address:" .. a.address }))
 
 		for _, x in ipairs(pip) do
 			hl.dispatch(x)
@@ -143,6 +145,7 @@ hl.bind(vars.kbWindowFullscreen, hl.dsp.window.fullscreen({ mode = "fullscreen" 
 hl.bind(vars.kbWindowBorderedFullscreen, hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind(vars.kbToggleWindowFloating, hl.dsp.window.float())
 hl.bind(vars.kbCloseWindow, hl.dsp.window.close())
+hl.bind("SUPER + I", hl.dsp.layout("togglesplit"))
 
 -- Windows actions (VIM KEYBINDS)
 hl.bind("SUPER + H", hl.dsp.focus({ direction = "left" }))
@@ -227,4 +230,31 @@ hl.bind(
 			.. " -a 'Shell' -A 'Test1=I got it!' -A 'Test2=Another action'"
 	)
 )
-hl.bind("CTRL + SUPER + SHIFT + ALT + T", hl.dsp.exec_cmd("/usr/local/bin/spacetoggle"))
+
+local fb_hk_enabled = false
+hl.bind("CTRL + SUPER + SHIFT + ALT + T", function()
+	if not fb_hk_enabled then
+		fb_hk_enabled = true
+		hl.bind("SPACE", hl.dsp.exec_cmd("ydotool key 111:1 54:1 19:1 aaa 111:0 54:0 19:0"))
+		hl.dispatch(hl.dsp.exec_cmd("notify-send -a 'Hyprland' 'Frame Buffer HK: Enabled' '(Macro Mode)'"))
+	else
+		fb_hk_enabled = false
+		hl.unbind("SPACE")
+		hl.dispatch(hl.dsp.exec_cmd("notify-send -a 'Hyprland' 'Frame Buffer HK: Disabled' '(Normal Mode)'"))
+	end
+end)
+
+local spam = false
+hl.bind("SUPER + mouse:274", function()
+	if not spam then
+		spam = true
+		hl.bind("mouse_up", hl.dsp.exec_cmd("ydotool click 0xC0"))
+		hl.bind("mouse_down", hl.dsp.exec_cmd("ydotool click 0xC0"))
+		hl.dispatch(hl.dsp.exec_cmd("notify-send -a 'Hyprland' 'Spam: Enabled' '(Macro Mode)'"))
+	else
+		spam = false
+		hl.unbind("mouse_up")
+		hl.unbind("mouse_down")
+		hl.dispatch(hl.dsp.exec_cmd("notify-send -a 'Hyprland' 'Spam: Disabled' '(Normal Mode)'"))
+	end
+end)
